@@ -74,6 +74,11 @@ type ServeMux struct {
 	handlers Handlers
 }
 
+// Returns the handlers
+func (m *ServeMux) Handlers() Handlers {
+	return m.handlers
+}
+
 // Implements the http.Handler interface
 func (m *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
