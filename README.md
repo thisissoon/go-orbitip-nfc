@@ -20,8 +20,8 @@ import (
 
 func main() {
 	handlers := make(orbitip.Handlers)
-	handlers.Set(orbitip.CO, func(v url.Values) ([]byte, error) {
-		fmt.Println("NFC Read")
+	handlers.Set(orbitip.CO, func(p orbitip.Params) ([]byte, error) {
+		fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))
 		return nil, nil
 	})
 	srv := orbitip.New(

@@ -3,7 +3,6 @@ package orbitip
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 // Default path and file ext the reader sends requests too: /orbit.php
@@ -52,8 +51,28 @@ var (
 	JSP  = Ext{7, ".jsp"}
 )
 
+// Params sent by NFC reader
+type Params struct {
+	Date     string
+	Time     string
+	ID       string
+	ULen     string
+	UID      string
+	Command  string
+	Version  string
+	Contact1 string
+	Contact2 string
+	SID      string
+	Data     string
+	PSRC     string
+	MD5      string
+	MAC      string
+	Relay    string
+	SD       string
+}
+
 // NFC command handler function
-type HandlerFunc func(parms url.Values) ([]byte, error)
+type HandlerFunc func(parms Params) ([]byte, error)
 
 // Mapping of NFC commands to handler functions
 type Handlers map[Command]HandlerFunc
@@ -87,7 +106,24 @@ func (m *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	b, err := fn(values)
+	b, err := fn(Params{
+		Date:     values.Get("date"),
+		Time:     values.Get("time"),
+		ID:       values.Get("id"),
+		ULen:     values.Get("ulen"),
+		UID:      values.Get("uid"),
+		Command:  values.Get("cmd"),
+		Version:  values.Get("ver"),
+		Contact1: values.Get("contact1"),
+		Contact2: values.Get("contact2"),
+		SID:      values.Get("sid"),
+		Data:     values.Get("data"),
+		PSRC:     values.Get("psrc"),
+		MD5:      values.Get("md5"),
+		MAC:      values.Get("mac"),
+		Relay:    values.Get("relay"),
+		SD:       values.Get("sd"),
+	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
