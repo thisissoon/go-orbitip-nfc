@@ -10,7 +10,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,16 +18,16 @@ import (
 )
 
 func main() {
-	handlers := make(orbitip.Handlers)
-	handlers.Set(orbitip.CO, func(p orbitip.Params) ([]byte, error) {
-		fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))
-		return nil, nil
-	})
 	srv := orbitip.New(
 		":8000",
 		orbitip.DEFAULT_ROOT,
 		orbitip.DEFAULT_EXT,
-		handlers)
+		orbitip.Handlers{
+			orbitip.CO: func(p orbitip.Params) ([]byte, error) {
+				fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))
+				return nil, nil
+			},
+		})
 	go srv.ListenAndServe()
 	defer srv.Shutdown(context.Background())
 	C := make(chan os.Signal, 1)
