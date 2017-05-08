@@ -2,6 +2,7 @@ package orbitip
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 )
@@ -85,6 +86,63 @@ func (rv ResponseValues) Root(value string) error {
 // by the reader for HTTP calls
 func (rv ResponseValues) Ext(ext Ext) error {
 	rv["EXT"] = fmt.Sprintf("%d", ext.ID)
+	return nil
+}
+
+// DHCP returns the DHCP response command, telling the reader to use DHCP
+func (rv ResponseValues) DHCP(v bool) {
+	s := "0"
+	if v {
+		s = "1"
+	}
+	rv["DHCP"] = s
+}
+
+// IP returns the IP response command, telling the reader to assign itself a
+// different IP address when it connects to the network, this will take care of
+// zero padding the ip, for example: 192.168.1.250 becomes 192.168.001.250
+func (rv ResponseValues) IP(v string) error {
+	ip := net.ParseIP(v)
+	str, err := ip2string(ip)
+	if err != nil {
+		return err
+	}
+	rv["IP"] = str
+	return nil
+}
+
+// Gateway returns the GW response command, this will take care of
+// zero padding the ip, for example: 192.168.1.250 becomes 192.168.001.250
+func (rv ResponseValues) Gateway(v string) error {
+	ip := net.ParseIP(v)
+	str, err := ip2string(ip)
+	if err != nil {
+		return err
+	}
+	rv["GW"] = str
+	return nil
+}
+
+// SubnetMask returns the NM response command, this will take care of
+// zero padding the ip, for example: 192.168.1.250 becomes 192.168.001.250
+func (rv ResponseValues) SubnetMask(ip string) error {
+	str, err := ip2string(net.ParseIP(ip))
+	if err != nil {
+		return err
+	}
+	rv["NM"] = str
+	return nil
+}
+
+// WebServer returns the WS response command, telling the reader where
+// to send commands too, this will take care of zero padding the ip,
+// for example: 192.168.1.250 becomes 192.168.001.250
+func (rv ResponseValues) WebServer(ip string) error {
+	str, err := ip2string(net.ParseIP(ip))
+	if err != nil {
+		return err
+	}
+	rv["WS"] = str
 	return nil
 }
 
@@ -239,4 +297,15 @@ func New(addr string, root string, ext Ext, handlers Handlers) *http.Server {
 		Addr:    addr,
 		Handler: mux,
 	}
+}
+
+// ip2string converts ip blocks to to 0 padded string
+// e.g: ip2string() = "192.168.001.250", nil
+func ip2string(ip net.IP) (string, error) {
+	blocks := strings.Split(ip.String(), ".")
+	parts := make([]string, 4)
+	for i, block := range blocks {
+		parts[i] = fmt.Sprintf("%03s", block)
+	}
+	return strings.Join(parts, "."), nil
 }

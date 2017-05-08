@@ -21,6 +21,8 @@ func main() {
 				rv.Beep(orbitip.LongBeep)
 				rv.Ext(orbitip.HTML)
 				rv.Deny()
+				rv.IP("192.168.1.252")
+				rv.WebServer("192.168.1.250")
 				return nil
 			},
 		})
