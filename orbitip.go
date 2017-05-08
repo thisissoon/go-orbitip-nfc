@@ -7,14 +7,14 @@ import (
 
 // Default path and file ext the reader sends requests too: /orbit.php
 var (
-	DEFAULT_ROOT = "/orbit"
-	DEFAULT_EXT  = PHP
+	DefaultRoot = "/orbit"
+	DefaultExt  = PHP
 )
 
-// Type for definging NFC reader commands
+// Command defines NFC reader command types
 type Command string
 
-// Support stringer interface
+// String returns the command string
 func (c Command) String() string {
 	return string(c)
 }
@@ -28,7 +28,7 @@ var (
 	PG = Command("PG") // Ping
 )
 
-// NFC Path Extenstion
+// Ext defines NFC path extenstion (.php, .asp etc)
 type Ext struct {
 	ID   uint8
 	Name string
@@ -71,34 +71,37 @@ type Params struct {
 	SD       string
 }
 
-// NFC command handler function
+// The HandlerFunc type allows the use of ordinary functions as NFC command handlers.
 type HandlerFunc func(parms Params) ([]byte, error)
 
-// Mapping of NFC commands to handler functions
+// Handlers maps a NFC command to a specific HandlerFunc.
 type Handlers map[Command]HandlerFunc
 
-// Sets the handler function for a given NFC command
+// Set sets a HandlerFunc for the given NFC command
 func (h Handlers) Set(cmd Command, fn HandlerFunc) {
 	h[cmd] = fn
 }
 
-// Removes a handler function for the given NFC command
+// Del removes a HandleFunc for the given NFC command
 func (h Handlers) Del(cmd Command) {
 	delete(h, cmd)
 }
 
-// NFC Server Mux, implementing the http.Handler interface
-// This can be passed directly into a http.Server instance on the Handler property
+// The ServeMux type implements the http.Handler interface for serving
+// NFC requests. This can be passed directly into a http.Server instance on the
+// Handler property.
 type ServeMux struct {
 	handlers Handlers
 }
 
-// Returns the handlers
+// Handlers returns the NFC Command to HandlerFunc map
 func (m *ServeMux) Handlers() Handlers {
 	return m.handlers
 }
 
-// Implements the http.Handler interface
+// ServeHTTP handles an NFC HTTP request, first checking if a HandleFunc
+// exists for the NFC command and if so calling that function. Any data returned
+// by the HandleFunc is written to the http response.
 func (m *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
 	fn, ok := m.handlers[Command(values.Get("cmd"))]
@@ -133,14 +136,14 @@ func (m *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// Constructs a new NFC Server Mux
+// NewServeMux constructs a new ServeMux
 func NewServeMux(handlers Handlers) *ServeMux {
 	return &ServeMux{
 		handlers: handlers,
 	}
 }
 
-// Constructs a new ready to use HTTP server for running the NFC HTTP server
+// New constructs a new HTTP server for running the NFC HTTP server
 func New(addr string, root string, ext Ext, handlers Handlers) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle(fmt.Sprintf("%s%s", root, ext), NewServeMux(handlers))

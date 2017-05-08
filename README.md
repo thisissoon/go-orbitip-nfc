@@ -20,8 +20,8 @@ import (
 func main() {
 	srv := orbitip.New(
 		":8000",
-		orbitip.DEFAULT_ROOT,
-		orbitip.DEFAULT_EXT,
+		orbitip.DefaultRoot,
+		orbitip.DefaultExt,
 		orbitip.Handlers{
 			orbitip.CO: func(p orbitip.Params) ([]byte, error) {
 				fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))

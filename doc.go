@@ -43,5 +43,4 @@ A simple implementation looks like this:
 		<-C
 	}
 */
-
 package orbitip
