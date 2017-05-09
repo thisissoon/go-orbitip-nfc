@@ -146,6 +146,87 @@ func (rv ResponseValues) WebServer(ip string) error {
 	return nil
 }
 
+// Port returns the PT response command, setting the port the reader
+// uses to send messages to the web server
+func (rv ResponseValues) Port(port int) {
+	rv["PT"] = fmt.Sprintf("%05d", port)
+}
+
+// Host sets the WN response command
+func (rv ResponseValues) Host(host string) error {
+	if len(host) > 64 {
+		return fmt.Errorf("host can be no more than 64 chracters, got %d", len(host))
+	}
+	rv["WN"] = host
+	return nil
+}
+
+// Relay sets the RELAY response command
+func (rv ResponseValues) Relay(v bool) {
+	s := "0"
+	if v {
+		s = "1"
+	}
+	rv["RELAY"] = s
+}
+
+// DefaultRelay sets the DEFRLY response command
+func (rv ResponseValues) DefaultRelay(v bool) {
+	s := "0"
+	if v {
+		s = "1"
+	}
+	rv["DEFRLY"] = s
+}
+
+// PassBackTime sets the PBKT response command, specifies the period between the
+// reader responding to the same card. E.g. PBKT=1000 will send requests every
+// 1000 milliseconds (1 second) when a card is kept in the field
+func (rv ResponseValues) PassBackTime(ms int) error {
+	if ms < 1 || ms > 9999 {
+		return fmt.Errorf("ms must be between 1ms and 9999ms, got %dms", ms)
+	}
+	rv["PBKT"] = fmt.Sprintf("%04d", ms)
+	return nil
+}
+
+// LED sets the LED response command. If true, the yellow/orange LED is switched ON.
+// If false, the LED is switched OFF.
+func (rv ResponseValues) LED(v bool) {
+	s := "0"
+	if v {
+		s = "1"
+	}
+	rv["LED"] = s
+}
+
+// LED1 sets the LED1 response command. This will activate LED1 (red) for n ms.
+func (rv ResponseValues) LED1(ms int) error {
+	if ms < 1 || ms > 9999 {
+		return fmt.Errorf("ms must be between 1ms and 9999ms, got %dms", ms)
+	}
+	rv["LED1"] = fmt.Sprintf("%04d", ms)
+	return nil
+}
+
+// LED2 sets the LED2 response command. This will activate LED2 (orange) for n ms.
+func (rv ResponseValues) LED2(ms int) error {
+	if ms < 1 || ms > 9999 {
+		return fmt.Errorf("ms must be between 1ms and 9999ms, got %dms", ms)
+	}
+	rv["LED2"] = fmt.Sprintf("%04d", ms)
+	return nil
+}
+
+// LED3 sets the LED3 response command. This will activate LED3 (green) for n ms.
+func (rv ResponseValues) LED3(ms int) error {
+	if ms < 1 || ms > 9999 {
+		return fmt.Errorf("ms must be between 1ms and 9999ms, got %dms", ms)
+	}
+	rv["LED3"] = fmt.Sprintf("%04d", ms)
+	return nil
+}
+
 // Command defines NFC reader command types
 type Command string
 

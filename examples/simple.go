@@ -20,9 +20,9 @@ func main() {
 				fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))
 				rv.Beep(orbitip.LongBeep)
 				rv.Ext(orbitip.HTML)
-				rv.Deny()
 				rv.IP("192.168.1.252")
 				rv.WebServer("192.168.1.250")
+				rv.Port(80)
 				return nil
 			},
 		})
