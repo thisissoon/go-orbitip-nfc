@@ -23,6 +23,7 @@ func main() {
 				rv.IP("192.168.1.252")
 				rv.WebServer("192.168.1.250")
 				rv.Port(80)
+				rv.UI(orbitip.UI{RedFlash: true, BuzzerIntermittent: true}, 3, 50)
 				return nil
 			},
 		})

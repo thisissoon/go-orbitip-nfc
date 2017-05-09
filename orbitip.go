@@ -1,11 +1,40 @@
 package orbitip
 
 import (
+	"encoding/hex"
 	"fmt"
 	"net"
 	"net/http"
 	"strings"
 )
+
+// The UI type configures reader UI responses, for example flashing the
+// green light
+type UI struct {
+	GreenOn            bool
+	GreenFlash         bool
+	AmberOn            bool
+	AmberFlash         bool
+	RedOn              bool
+	RedFlash           bool
+	BuzzerOn           bool
+	BuzzerIntermittent bool
+}
+
+// byte returns the byte representation of the ui configuration for hex encoding
+func (ui UI) byte() byte {
+	b := []uint8{
+		b2ui8(ui.GreenOn),
+		b2ui8(ui.GreenFlash),
+		b2ui8(ui.AmberOn),
+		b2ui8(ui.AmberFlash),
+		b2ui8(ui.RedOn),
+		b2ui8(ui.RedFlash),
+		b2ui8(ui.BuzzerOn),
+		b2ui8(ui.BuzzerIntermittent),
+	}
+	return b[7]<<7 | b[6]<<6 | b[5]<<5 | b[4]<<4 | b[3]<<3 | b[2]<<2 | b[1]<<1 | b[0]
+}
 
 // Default path and file ext the reader sends requests too: /orbit.php
 var (
@@ -227,6 +256,13 @@ func (rv ResponseValues) LED3(ms int) error {
 	return nil
 }
 
+func (rv ResponseValues) UI(ui UI, cycles uint8, interval uint8) {
+	src := []byte{ui.byte(), cycles, interval}
+	dst := make([]byte, hex.EncodedLen(len(src)))
+	hex.Encode(dst, src)
+	rv["UI"] = fmt.Sprintf("%s", dst)
+}
+
 // Command defines NFC reader command types
 type Command string
 
@@ -389,4 +425,12 @@ func ip2string(ip net.IP) (string, error) {
 		parts[i] = fmt.Sprintf("%03s", block)
 	}
 	return strings.Join(parts, "."), nil
+}
+
+// b2ui8 converts a bool to a uint8
+func b2ui8(b bool) uint8 {
+	if b {
+		return uint8(1)
+	}
+	return uint8(0)
 }
