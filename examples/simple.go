@@ -12,18 +12,30 @@ import (
 
 func main() {
 	srv := orbitip.New(
-		":8000",
+		":80",
 		orbitip.DefaultRoot,
 		orbitip.DefaultExt,
 		orbitip.Handlers{
+			orbitip.PowerUpCmd: func(rv orbitip.ResponseValues, p orbitip.Params) error {
+				fmt.Println("Power Up")
+				rv.UI(orbitip.UI{RedFlash: true, BuzzerIntermittent: true}, 5, 50)
+				return nil
+			},
 			orbitip.CardReadCmd: func(rv orbitip.ResponseValues, p orbitip.Params) error {
-				fmt.Println(fmt.Sprintf("NFC read from %s", p.UID))
-				rv.Beep(orbitip.LongBeep)
-				rv.Ext(orbitip.HTML)
-				rv.IP("192.168.1.252")
-				rv.WebServer("192.168.1.250")
-				rv.Port(80)
-				rv.UI(orbitip.UI{RedFlash: true, BuzzerIntermittent: true}, 3, 50)
+				fmt.Println("Card Read")
+				rv.UI(orbitip.UI{GreenFlash: true, BuzzerIntermittent: true}, 3, 50)
+				return nil
+			},
+			orbitip.PingCmd: func(rv orbitip.ResponseValues, p orbitip.Params) error {
+				fmt.Println("Ping")
+				return nil
+			},
+			orbitip.LevelChangeCmd: func(rv orbitip.ResponseValues, p orbitip.Params) error {
+				fmt.Println("Level Change", p.Contact1, p.Contact2)
+				return nil
+			},
+			orbitip.LevelChangeCmd: func(rv orbitip.ResponseValues, p orbitip.Params) error {
+				fmt.Println("Heart Beat")
 				return nil
 			},
 		})
